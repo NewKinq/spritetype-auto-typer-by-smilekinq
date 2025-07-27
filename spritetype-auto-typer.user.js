@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         SpriteType Auto Typer by Smilekinq
-// @namespace    https://github.com/NewKinq
+// @namespace    http://tampermonkey.net/
 // @version      1.0
 // @description  Auto-play, auto-submit, and auto-reload SpriteType forever 🧠
 // @author       @Smilekinq
