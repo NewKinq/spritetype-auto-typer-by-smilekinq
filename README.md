@@ -46,6 +46,9 @@ Use at your own risk. This script interacts with a live app and may violate the 
 
 ---
 
-## 📜 License
+## License
 
-MIT — Free to use and modify
+This project is licensed under the [Creative Commons BY-ND 4.0 License](https://creativecommons.org/licenses/by-nd/4.0/).  
+You are free to share the script with credit, but **modifying or redistributing altered versions is not allowed.**  
+
+© 2025 Smilekinq
