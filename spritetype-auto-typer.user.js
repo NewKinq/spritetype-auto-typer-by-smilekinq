@@ -3,7 +3,7 @@
 // @namespace    https://github.com/NewKinq
 // @version      1.0
 // @description  Auto-play, auto-submit, and auto-reload SpriteType forever 🧠
-// @author       @smilekinq
+// @author       @Smilekinq
 // @match        https://spritetype.irys.xyz/*
 // @grant        none
 // ==/UserScript==
