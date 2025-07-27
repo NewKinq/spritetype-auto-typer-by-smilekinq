@@ -1,4 +1,14 @@
-(async () => {
+// ==UserScript==
+// @name         SpriteType Auto Typer (Slower - Human Mode)
+// @namespace    https://github.com/NewKinq
+// @version      1.1
+// @description  Auto-types SpriteType words at realistic human typing speed (50–70 WPM), submits score, and reloads
+// @author       Smilekinq
+// @match        https://spritetype.irys.xyz/*
+// @grant        none
+// ==/UserScript==
+
+(function () {
   const delay = (ms) => new Promise((res) => setTimeout(res, ms));
 
   const getRandomDelay = () => {
@@ -23,30 +33,42 @@
     input.value = "";
   };
 
-  let gameOver = false;
+  const observeGameEnd = () => {
+    return new Promise((resolve) => {
+      const observer = new MutationObserver(() => {
+        const button = document.querySelector("button.text-sm");
+        if (button && button.innerText.includes("Restart")) {
+          observer.disconnect();
+          resolve(true);
+        }
+      });
 
-  const observer = new MutationObserver(() => {
-    const button = document.querySelector("button.text-sm");
-    if (button && button.innerText.includes("Restart")) {
-      gameOver = true;
+      observer.observe(document.body, { childList: true, subtree: true });
+    });
+  };
+
+  const main = async () => {
+    while (true) {
+      const word = getWord();
+      if (word) {
+        await typeWord(word);
+      }
+      await delay(50);
     }
-  });
+  };
 
-  observer.observe(document.body, { childList: true, subtree: true });
+  const start = async () => {
+    await main();
+    await observeGameEnd();
 
-  while (!gameOver) {
-    const word = getWord();
-    if (word) {
-      await typeWord(word);
+    // Auto-submit score
+    const submitBtn = document.querySelector("button.text-sm");
+    if (submitBtn && submitBtn.innerText.includes("Submit score")) {
+      submitBtn.click();
+      await delay(1000);
+      location.reload();
     }
-    await delay(50); // slight delay to avoid tight loop
-  }
+  };
 
-  // Auto-submit score and reload page
-  const submitBtn = document.querySelector("button.text-sm");
-  if (submitBtn && submitBtn.innerText.includes("Submit score")) {
-    submitBtn.click();
-    await delay(1000);
-    location.reload();
-  }
+  start();
 })();
