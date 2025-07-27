@@ -1,58 +1,52 @@
-// ==UserScript==
-// @name         Irys SpriteType Auto Typer
-// @namespace    http://tampermonkey.net/
-// @version      1.0
-// @description  Auto-play, auto-submit, and auto-reload SpriteType by Irys
-// @author       Smilekinq
-// @match        https://spritetype.irys.xyz/*
-// @icon         https://www.google.com/s2/favicons?sz=64&domain=irys.xyz
-// @grant        none
-// ==/UserScript==
+(async () => {
+  const delay = (ms) => new Promise((res) => setTimeout(res, ms));
 
-(function() {
-    'use strict';
+  const getRandomDelay = () => {
+    // 50–70 WPM = roughly 180ms to 250ms per character
+    return Math.floor(Math.random() * (250 - 180 + 1)) + 180;
+  };
 
-    const TYPING_INTERVAL_MS = 150;
-    const POST_SUBMIT_WAIT_MS = 1500;
-    const RELOAD_WAIT_MS = 2000;
+  const getWord = () => {
+    const wordBox = document.querySelector(".word-box");
+    return wordBox ? wordBox.innerText.trim() : "";
+  };
 
-    function typeWord(word) {
-        return new Promise((resolve) => {
-            const input = document.querySelector("input[type='text']");
-            if (!input) return resolve();
-
-            input.value = word;
-            input.dispatchEvent(new Event('input', { bubbles: true }));
-
-            setTimeout(() => {
-                const event = new KeyboardEvent('keydown', { key: ' ', code: 'Space', bubbles: true });
-                input.dispatchEvent(event);
-                resolve();
-            }, TYPING_INTERVAL_MS);
-        });
+  const typeWord = async (word) => {
+    const input = document.querySelector("input[type='text']");
+    for (let letter of word) {
+      input.value += letter;
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+      await delay(getRandomDelay());
     }
+    input.dispatchEvent(new KeyboardEvent("keydown", { key: " ", bubbles: true }));
+    input.dispatchEvent(new KeyboardEvent("keyup", { key: " ", bubbles: true }));
+    input.value = "";
+  };
 
-    async function autoPlay() {
-        const wordElements = document.querySelectorAll('div[style*="position: absolute"][style*="top"]');
-        const words = Array.from(wordElements).map(el => el.textContent.trim()).filter(Boolean);
+  let gameOver = false;
 
-        for (const word of words) {
-            await typeWord(word);
-        }
-
-        setTimeout(() => {
-            const submitBtn = Array.from(document.querySelectorAll("button")).find(btn => btn.textContent.toLowerCase().includes("submit"));
-            if (submitBtn) {
-                submitBtn.click();
-            }
-
-            setTimeout(() => {
-                window.location.reload();
-            }, RELOAD_WAIT_MS);
-        }, POST_SUBMIT_WAIT_MS);
+  const observer = new MutationObserver(() => {
+    const button = document.querySelector("button.text-sm");
+    if (button && button.innerText.includes("Restart")) {
+      gameOver = true;
     }
+  });
 
-    setTimeout(() => {
-        autoPlay();
-    }, 3000);
+  observer.observe(document.body, { childList: true, subtree: true });
+
+  while (!gameOver) {
+    const word = getWord();
+    if (word) {
+      await typeWord(word);
+    }
+    await delay(50); // slight delay to avoid tight loop
+  }
+
+  // Auto-submit score and reload page
+  const submitBtn = document.querySelector("button.text-sm");
+  if (submitBtn && submitBtn.innerText.includes("Submit score")) {
+    submitBtn.click();
+    await delay(1000);
+    location.reload();
+  }
 })();
